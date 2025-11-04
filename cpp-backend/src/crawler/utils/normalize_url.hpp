@@ -1,7 +1,11 @@
+#ifndef NORMALIZE_URL_HPP
+#define NORMALIZE_URL_HPP
+
 #include <boost/url.hpp>
 #include <iostream>
+#include <string>
 
-std::string normalize_with_boost(const std::string& url) {
+inline std::string normalize_with_boost(const std::string& url) {
     boost::urls::url url_ = boost::urls::parse_uri_reference(url).value();
 
     // Apply various normalization steps
@@ -13,3 +17,5 @@ std::string normalize_with_boost(const std::string& url) {
 
     return url_.buffer();
 }
+
+#endif // NORMALIZE_URL_HPP

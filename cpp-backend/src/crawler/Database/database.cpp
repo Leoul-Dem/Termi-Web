@@ -11,7 +11,7 @@ URLDatabase::URLDatabase(const std::string& path){
   options.create_missing_column_families = true;
   // Define the column families we want to use
   std::vector<std::string> cf_names = {
-    ROCKSDB_DEFAULT_COLUMN_FAMILY_NAME, // "default"
+    "default",
     "site",
     "fwd_links",
     "back_links"
@@ -99,9 +99,9 @@ Site URLDatabase::deserialize_site(const std::string& site){
 
   std::stringstream ss(site);
 
-  std::getline(ss, status_code, site_delimiter);
-  std::getline(ss, last_crawled, site_delimiter);
-  std::getline(ss, HTML, site_delimiter);
+  std::getline(ss, status_code, site_delim[0]);
+  std::getline(ss, last_crawled, site_delim[0]);
+  std::getline(ss, HTML, site_delim[0]);
 
   return {HTML, std::stoi(status_code), std::stoll(last_crawled)};
 }
@@ -109,20 +109,20 @@ Site URLDatabase::deserialize_site(const std::string& site){
 // Public Methods
 
 // All the individual setters
-bool add_url(const std::string& url, const Site& site){
+bool URLDatabase::add_url(const std::string& url, const Site& site){
   std::string site_ = serialize_site(site);
   rocksdb::Status s = db->Put(rocksdb::WriteOptions(), site_cf, url, site_);
   return s.ok();
 }
 
-bool append_forward_link(const std::string& url, const std::string& link){
+bool URLDatabase::append_forward_link(const std::string& url, const std::string& link){
   std::vector<std::string> links_;
   get_forward_links(url, links_);
   links_.push_back(link);
   return add_forward_links(url, links_);
 }
 
-bool append_back_link(const std::string& url, const std::string& link){
+bool URLDatabase::append_back_link(const std::string& url, const std::string& link){
   std::vector<std::string> links_;
   get_back_links(url, links_);
   links_.push_back(link);
@@ -130,20 +130,20 @@ bool append_back_link(const std::string& url, const std::string& link){
 }
 
 // All the large setters
-bool add_forward_links(const std::string& url, const std::vector<std::string>& links){
+bool URLDatabase::add_forward_links(const std::string& url, const std::vector<std::string>& links){
   std::string links_ = serialize_links(links);
-  rocksdb::Status s = db->Put(rocksdb::WriteOptions(), fwd_links_cf, links_);
+  rocksdb::Status s = db->Put(rocksdb::WriteOptions(), fwd_links_cf, url, links_);
   return s.ok();
 }
 
-bool add_back_links(const std::string& url, const std::vector<std::string>& links){
+bool URLDatabase::add_back_links(const std::string& url, const std::vector<std::string>& links){
   std::string links_ = serialize_links(links);
-  rocksdb::Status s = db->Put(rocksdb::WriteOptions(), back_links_cf, links_);
+  rocksdb::Status s = db->Put(rocksdb::WriteOptions(), back_links_cf, url, links_);
   return s.ok();
 }
 
 // All the getters
-int get_site(const std::string& url, Site& site){
+int URLDatabase::get_site(const std::string& url, Site& site){
   std::string site_;
   rocksdb::Status s = db->Get(rocksdb::ReadOptions(), site_cf, url, &site_);
 
@@ -154,24 +154,24 @@ int get_site(const std::string& url, Site& site){
   return 0;
 }
 
-int get_forward_links(const std::string& url, std::vector<std::string>& links){
+int URLDatabase::get_forward_links(const std::string& url, std::vector<std::string>& links){
   std::string links_;
   rocksdb::Status s = db->Get(rocksdb::ReadOptions(), fwd_links_cf, url, &links_);
 
   if (s.IsNotFound()) return 1;
   if (!s.ok()) return -1;
 
-  site = deserialize_site(links_);
+  links = deserialize_links(links_);
   return 0;
 }
 
-int get_back_links(const std::string& url, std::vector<std::string>& links){
+int URLDatabase::get_back_links(const std::string& url, std::vector<std::string>& links){
   std::string links_;
   rocksdb::Status s = db->Get(rocksdb::ReadOptions(), back_links_cf, url, &links_);
 
   if (s.IsNotFound()) return 1;
   if (!s.ok()) return -1;
 
-  site = deserialize_site(links_);
+  links = deserialize_links(links_);
   return 0;
 }

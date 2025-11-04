@@ -1,0 +1,8 @@
+CompileFlags:
+  Add:
+    - "-std=c++17"
+  CompilationDatabase: cpp-backend/build
+
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
