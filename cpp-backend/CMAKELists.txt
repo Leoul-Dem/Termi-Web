@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.15)
+project(cpp-backend)
+
+set(CMAKE_CXX_STANDARD 20)
+
+# Add RocksDB as a subdirectory
+add_subdirectory(libs/rocksdb)
+
+add_executable(cpp-backend
+        src/crawler/crawler.hpp)
+
+# Link against RocksDB and include its headers
+target_link_libraries(cpp-backend rocksdb)
+target_include_directories(cpp-backend PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/rocksdb/include)
