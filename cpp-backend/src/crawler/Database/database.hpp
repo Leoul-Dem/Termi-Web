@@ -1,5 +1,4 @@
-#ifndef URLDATABASE_H
-#define URLDATABASE_H
+#pragma once
 
 #include "rocksdb/db.h"
 #include <string>
@@ -51,4 +50,3 @@ public:
     int get_forward_links(const std::string& url, std::vector<std::string>& links);
     int get_back_links(const std::string& url, std::vector<std::string>& links);
 };
-#endif

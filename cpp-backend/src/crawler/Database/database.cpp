@@ -9,6 +9,7 @@ URLDatabase::URLDatabase(const std::string& path){
   rocksdb::Options options;
   options.create_if_missing = true;
   options.create_missing_column_families = true;
+  db_path = path;
   // Define the column families we want to use
   std::vector<std::string> cf_names = {
     "default",

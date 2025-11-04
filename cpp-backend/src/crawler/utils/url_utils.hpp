@@ -1,11 +1,9 @@
-#ifndef NORMALIZE_URL_HPP
-#define NORMALIZE_URL_HPP
+#pragma once
 
 #include <boost/url.hpp>
-#include <iostream>
 #include <string>
 
-inline std::string normalize_with_boost(const std::string& url) {
+inline std::string normalize_url(const std::string& url) {
     boost::urls::url url_ = boost::urls::parse_uri_reference(url).value();
 
     // Apply various normalization steps
@@ -17,5 +15,8 @@ inline std::string normalize_with_boost(const std::string& url) {
 
     return url_.buffer();
 }
-
-#endif // NORMALIZE_URL_HPP
+// TODO
+inline int validate_url(const std::string& url){
+    // makes a HEAD cUrl request to the url
+    return 0;
+}
