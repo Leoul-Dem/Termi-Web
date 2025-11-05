@@ -2,6 +2,7 @@
 
 #include <boost/url.hpp>
 #include <string>
+#include "cpr/cpr.h"
 
 inline std::string normalize_url(const std::string& url) {
     boost::urls::url url_ = boost::urls::parse_uri_reference(url).value();
@@ -15,8 +16,14 @@ inline std::string normalize_url(const std::string& url) {
 
     return url_.buffer();
 }
-// TODO
-inline int validate_url(const std::string& url){
-    // makes a HEAD cUrl request to the url
-    return 0;
+
+inline int get_url_status_code(const std::string& url){
+    return cpr::Head(cpr::Url{url}).status_code;
+}
+
+inline bool is_status_good(int status_code){
+    if(status_code == 200){
+        return true;
+    }
+    return false;
 }

@@ -112,3 +112,22 @@ install(DIRECTORY src/crawler/
     DESTINATION include/termi_web
     FILES_MATCHING PATTERN "*.hpp"
 )
+
+include(FetchContent)
+
+FetchContent_Declare(
+    gumbo-parser
+    GIT_REPOSITORY https://github.com/google/gumbo-parser.git
+    GIT_TAG        master
+)
+FetchContent_MakeAvailable(gumbo-parser)
+
+FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
+                         GIT_TAG da40186618909b1a7363d4e4495aa899c6e0eb75.12.0) # Replace with your desired git commit from: https://github.com/libcpr/cpr/releases
+FetchContent_MakeAvailable(cpr)
+
+add_library(parser
+    src/crawler/utils/page_parser.hpp
+)
+
+target_link_libraries(parser PRIVATE cpr::cpr)

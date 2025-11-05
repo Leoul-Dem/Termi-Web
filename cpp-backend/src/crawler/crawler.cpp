@@ -21,7 +21,7 @@ bool Crawler::crawl_again(const long long& recorded_time){
 
 void Crawler::crawl_seen_page(Curr_URL curr_url, Site site_){
   // validate if the page is good
-      site_.status_code = validate_url(curr_url.url);
+      site_.status_code = get_url_status_code(curr_url.url);
       if(!is_status_good(site_.status_code)){
         return;
       }
@@ -51,7 +51,7 @@ void Crawler::crawl_seen_page(Curr_URL curr_url, Site site_){
 }
 
 void Crawler::crawl_unseen_page(Curr_URL curr_url, Site site_){
-  site_.status_code = validate_url(curr_url.url);
+  site_.status_code = get_url_status_code(curr_url.url);
   if(!is_status_good(site_.status_code)){
     return;
   }
