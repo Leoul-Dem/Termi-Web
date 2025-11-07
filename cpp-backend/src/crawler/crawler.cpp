@@ -42,7 +42,7 @@ void Crawler::crawl_seen_page(Curr_URL curr_url, Site site_){
 
         // check if the forward links have changed
         if(fwd_links != temp_fwd_links){
-          db.add_forward_links(curr_url.url, temp_fwd_links);
+          db.add_forward_links(curr_url.url, fwd_links);
         }
 
         // TODO

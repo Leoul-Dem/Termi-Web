@@ -4,7 +4,7 @@
 #include "cpr/cpr.h"
 #include <iostream>
 
-static void gather_links(GumboNode* node, std::vector<std::string>& fwd_links){
+inline void gather_links(GumboNode* node, std::vector<std::string>& fwd_links){
     if (node->type != GUMBO_NODE_ELEMENT) {
         return;
     }
@@ -27,7 +27,7 @@ static void gather_links(GumboNode* node, std::vector<std::string>& fwd_links){
     }
 }
 
-static void extract_text(GumboNode* node, std::stringstream& text_buffer) {
+inline void extract_text(GumboNode* node, std::stringstream& text_buffer) {
     // If this is a text node, append its content
     if (node->type == GUMBO_NODE_TEXT) {
         text_buffer << node->v.text.text << " ";
@@ -47,7 +47,7 @@ static void extract_text(GumboNode* node, std::stringstream& text_buffer) {
     }
 }
 
-int parse_page(const std::string& url,
+inline  int parse_page(const std::string& url,
                 std::string& page,
                 std::vector<std::string>& fwd_links){
     cpr::Response resp = cpr::Get(cpr::Url{url});
