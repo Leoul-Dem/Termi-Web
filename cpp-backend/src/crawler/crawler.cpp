@@ -1,5 +1,6 @@
 #include "crawler.hpp"
-#include "database.hpp"
+#include "./database/database.hpp"
+#include "./database/queue.hpp"
 #include "page_parser.hpp"
 #include "url_utils.hpp"
 #include "misc.hpp"
@@ -8,11 +9,22 @@
 
 Crawler::Crawler(std::string db_path, std::string seed_url) :
   db(db_path),
+  queue("tcp://127.0.0.1:6379"),
   seed_url(seed_url)
-  {}
+  {
+    // Enqueue the seed URL to start crawling
+    queue.enqueue({seed_url, ""});
+  }
 
-void Crawler::enqueue_links(){
-
+void Crawler::enqueue_links(const std::vector<std::string>& links, const std::string& back_link){
+  std::vector<QueueItem> items;
+  items.reserve(links.size());
+  
+  for(const auto& link : links) {
+    items.push_back({link, back_link});
+  }
+  
+  queue.enqueue_batch(items);
 }
 
 bool Crawler::crawl_again(const long long& recorded_time){
@@ -45,8 +57,8 @@ void Crawler::crawl_seen_page(Curr_URL curr_url, Site site_){
           db.add_forward_links(curr_url.url, fwd_links);
         }
 
-        // TODO
-        // REDIS ENQUEUE temp_fwd_links
+        // Enqueue the forward links
+        enqueue_links(fwd_links, curr_url.url);
       }
 }
 
@@ -63,8 +75,9 @@ void Crawler::crawl_unseen_page(Curr_URL curr_url, Site site_){
   site_.last_crawled = get_curr_time();
   db.add_url(curr_url.url, site_);
   db.add_forward_links(curr_url.url, fwd_links);
-  // TODO
-  // REDIS ENQUEUE fwd_links, curr_url.url
+  
+  // Enqueue the forward links with current URL as back_link
+  enqueue_links(fwd_links, curr_url.url);
 }
 
 void Crawler::crawl(){
@@ -73,12 +86,19 @@ void Crawler::crawl(){
   Site site_;
 
   for(int i = 0; i < CRAWL_LIMIT; i++){
-    // TODO
-    curr_url = {}; // REDIS DEQUEUE
+    // Dequeue next URL to crawl
+    QueueItem item;
+    if(!queue.dequeue(item)){
+      // Queue is empty, stop crawling
+      break;
+    }
+    
+    curr_url.url = item.url;
+    curr_url.b_link = item.back_link;
     site_ = {};
 
     // check if the page has been crawled
-    if(!db.get_site(curr_url.url, site_) &&
+    if(db.get_site(curr_url.url, site_) &&
         crawl_again(site_.last_crawled)){
 
       crawl_seen_page(curr_url, site_);

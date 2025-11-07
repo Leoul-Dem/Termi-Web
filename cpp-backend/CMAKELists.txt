@@ -47,18 +47,21 @@ endif()
 # Find Boost (for URL parsing)
 find_package(Boost 1.70 REQUIRED COMPONENTS url)
 
+# Find redis-plus-plus
+find_package(redis++ REQUIRED)
+
 # Include directories
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/src/crawler
-    ${CMAKE_SOURCE_DIR}/src/crawler/Database
+    ${CMAKE_SOURCE_DIR}/src/crawler/database
     ${CMAKE_SOURCE_DIR}/src/crawler/utils
 )
 
-# Database library
+# database library
 add_library(crawler_database
-    src/crawler/Database/database.cpp
-    src/crawler/Database/database.hpp
+    src/crawler/database/database.cpp
+    src/crawler/database/database.hpp
 )
 
 target_link_libraries(crawler_database
@@ -75,6 +78,16 @@ target_link_libraries(url_utils
     INTERFACE Boost::url
 )
 
+# Queue library
+add_library(crawler_queue
+    src/crawler/database/queue.cpp
+    src/crawler/database/queue.hpp
+)
+
+target_link_libraries(crawler_queue
+    PUBLIC redis++::redis++
+)
+
 # Crawler library
 add_library(crawler
     src/crawler/crawler.hpp
@@ -84,6 +97,7 @@ set_target_properties(crawler PROPERTIES LINKER_LANGUAGE CXX)
 
 target_link_libraries(crawler
     PUBLIC crawler_database
+    PUBLIC crawler_queue
     PUBLIC url_utils
 )
 

@@ -8,6 +8,7 @@ using namespace std;
 class Crawler{
 private:
   URLDatabase db;
+  CrawlerQueue queue;
   const int CRAWL_LIMIT = 100000;
   const long long PAGE_LIFETIME = 1209600000;
   const std::string seed_url;
